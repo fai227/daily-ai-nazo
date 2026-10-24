@@ -4,7 +4,7 @@
 
 ## 開発
 
-Node.js 22.12以降とpnpmを使用します。
+Node.js 22.23.4以降（CIは24系）とpnpmを使用します。
 
 ```sh
 pnpm install
