@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-25",
+  "approved": true,
+  "revision": 1,
+  "image": "/images/2026-10-25.png",
+  "alt": "2026年10月25日。今日のAI謎。最後に残るものは？ CLIMBからB、DIVIDEからE、EXILEからEEへの矢印。MIXTAPEから4マスの空欄への矢印。答えは、ある物の名前。",
+  "answers": [
+    "TAPE",
+    "テープ",
+    "てーぷ"
+  ],
+  "display_answer": "TAPE（テープ）",
+  "hints": [
+    "消える文字を、例から集めてみましょう。",
+    "消える文字には、アルファベット以外の共通の役割があります。",
+    "I・V・X・L・C・D・Mはローマ数字に使われる文字です。"
+  ],
+  "explanation": "消えているのはローマ数字に使われる文字、I・V・X・L・C・D・Mです。\nCLIMBはC・L・I・Mが消えてB、DIVIDEはD・I・V・I・Dが消えてE、EXILEはX・I・Lが消えてEE。MIXTAPEではM・I・Xが消え、TAPEが残る。テープは物の名前という条件にも合う。"
+}
