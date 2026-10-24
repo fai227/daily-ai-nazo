@@ -1,0 +1,14 @@
+---
+import '../styles/global.css';
+import { href } from '../lib/puzzles';
+const { title = '今日のAI謎' } = Astro.props;
+---
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /><title>{title} | 今日のAI謎</title></head>
+<body>
+<header><a href={href()}>今日のAI謎</a><a href={href('archive/')}>過去の謎</a></header>
+<main><slot /></main>
+<footer>毎日の、ひらめきを。<br />正解の記録はこの端末に保存されます。</footer>
+<script>import '../scripts/answer.js';</script>
+</body></html>

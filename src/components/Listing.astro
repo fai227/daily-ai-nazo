@@ -1,0 +1,5 @@
+---
+import { puzzleUrl } from '../lib/puzzles';
+const { puzzles } = Astro.props;
+---
+<ul class="archive">{puzzles.map(({data:p}) => <li><a href={puzzleUrl(p.date)}><time>{p.date}</time><span>今日のAI謎</span><span data-solved={`${p.date}:${p.revision}`}></span><span aria-hidden="true">→</span></a></li>)}</ul>

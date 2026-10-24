@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Listing from '../components/Listing.astro';
+import { publishedPuzzles, puzzleUrl, href } from '../lib/puzzles';
+export async function getStaticPaths() {
+  const puzzles = await publishedPuzzles();
+  const groups = new Set(['archive', ...puzzles.flatMap(p => [p.data.date.slice(0,4), p.data.date.slice(0,7).replace('-', '/')])]);
+  return [
+    ...puzzles.map((p,i) => ({params:{path:p.data.date.replaceAll('-','/')},props:{kind:'puzzle',p:p.data,previous:puzzles[i+1]?.data,next:puzzles[i-1]?.data}})),
+    ...[...groups].map(path => ({params:{path},props:{kind:'archive',path,puzzles:puzzles.filter(p => path==='archive'||p.data.date.replaceAll('-','/').startsWith(path))}})),
+  ];
+}
+const { kind, p, previous, next, path, puzzles } = Astro.props;
+const title = kind === 'puzzle' ? `${p.date} の謎` : path==='archive' ? '過去の謎' : path.length===4 ? `${path}年の謎` : `${path.slice(0,4)}年${Number(path.slice(5))}月の謎`;
+const groups = kind==='archive' ? [...new Set(puzzles.map(p => path==='archive' ? p.data.date.slice(0,4) : path.length===4 ? p.data.date.slice(0,7).replace('-','/') : ''))].filter(Boolean) : [];
+---
+<Layout title={title}>
+{kind==='puzzle' ? <>
+<a class="back" href={href('archive/')}>← 過去の謎</a><p class="eyebrow">今日のAI謎</p><h1>{title}</h1>
+<a class="puzzle-image" href={href(p.image)} target="_blank" rel="noopener"><img src={href(p.image)} width="1600" height="1200" alt={p.alt} /></a><p class="caption">画像を押すと、大きく表示します。</p>
+<section><h2>答え合わせ</h2><form id="answer-form"><label for="answer">答えを入力</label><div class="answer-row"><input id="answer" name="answer" autocomplete="off" required /><button>確認する</button></div></form><p id="result" role="status" aria-live="polite"></p><noscript>答え合わせにはJavaScriptを有効にしてください。</noscript></section>
+<section><h2>少しだけ、手掛かりを。</h2>{p.hints.map((hint,n) => <details><summary>ヒント {n+1}</summary><p>{hint}</p></details>)}</section>
+<details id="solution"><summary>答え・解説を見る</summary><h2>{p.display_answer}</h2><p class="explanation">{p.explanation}</p></details>
+<nav class="neighbors">{previous ? <a href={puzzleUrl(previous.date)}>← 前の謎</a> : <span></span>}{next && <a href={puzzleUrl(next.date)}>次の謎 →</a>}</nav>
+<script is:inline id="puzzle-data" type="application/json" set:html={JSON.stringify({id:p.date,revision:p.revision,answers:p.answers}).replaceAll('<','\\u003c')} />
+</> : <><h1>{title}</h1>{groups.length ? groups.map(group => <section><h2><a href={href(group+'/')}>{group.replace('/','年')} →</a></h2><Listing puzzles={puzzles.filter(p => p.data.date.replaceAll('-','/').startsWith(group))} /></section>) : <Listing puzzles={puzzles} />}</>}
+</Layout>
