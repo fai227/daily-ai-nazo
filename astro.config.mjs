@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
 export default defineConfig({
-  site: 'https://fai227.github.io',
-  base: '/daily-ai-nazo',
+  site: 'https://nazo.fai227.com',
+  base: '/',
   output: 'static',
   trailingSlash: 'always',
 });
