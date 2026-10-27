@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-28",
+  "approved": true,
+  "revision": 10,
+  "image": "/images/2026-10-28.png",
+  "alt": "今日のAI謎、2026年10月28日。？に入る英単語は？ GLOW→TOLD、HOLD→SLOW、ZIG→？。",
+  "answers": [
+    "ART",
+    "art",
+    "アート",
+    "あーと"
+  ],
+  "display_answer": "ART（アート）",
+  "hints": [
+    "文字の並べ替えではありません。",
+    "文字そのものを、同じ対応で交換します。",
+    "アルファベットの両端を結んでみましょう。"
+  ],
+  "explanation": "アルファベットを逆順に対応させる。AとZ、BとY、…を交換するとGLOW→TOLD、HOLD→SLOW、ZIG→ART。"
+}
