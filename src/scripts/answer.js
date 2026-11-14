@@ -33,42 +33,53 @@ if (dataElement) {
 const track = document.querySelector('.carousel-track');
 if (track) {
  const slides = [...track.children], root = track.closest('.carousel');
- const count = root.querySelector('[data-carousel-count]');
+ const viewport = root.querySelector('.carousel-viewport');
  const pause = root.querySelector('[data-carousel-pause]');
  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
- let index = 0, paused = reduced.matches, hovering = false, focused = false;
- track.classList.add('drum');
- function render() {
-  slides.forEach((slide, i) => {
-   const active = i === index;
-   slide.classList.toggle('active', active);
-   slide.inert = !active;
-   slide.setAttribute('aria-hidden', String(!active));
-  });
-  count.textContent = `${index + 1} / ${slides.length}`;
-  pause.textContent = paused ? '▶' : 'Ⅱ';
-  pause.setAttribute('aria-label', paused ? '自動送りを再開' : '自動送りを停止');
+ let position = 1, busy = false, timer, paused = reduced.matches, hovering = false, focused = false, gesture = null, suppressClick = false;
+ const first = slides[0].cloneNode(true), last = slides.at(-1).cloneNode(true);
+ for (const clone of [first,last]) { clone.inert = true; clone.setAttribute('aria-hidden','true'); clone.querySelectorAll('img').forEach(img => img.loading='eager'); }
+ track.prepend(last); track.append(first); root.classList.add('enhanced');
+ function draw(animate = false, offset = 0) {
+  track.style.transition = animate && !reduced.matches ? 'transform 450ms ease' : 'none';
+  track.style.transform = `translateX(calc(${-position * 100}% + ${offset}px))`;
+  const active = (position - 1 + slides.length) % slides.length;
+  slides.forEach((slide,i) => { slide.inert=i!==active; slide.setAttribute('aria-hidden',String(i!==active)); });
  }
- function move(delta) { index = (index + delta + slides.length) % slides.length; render(); }
+ function finish() {
+  clearTimeout(timer);
+  if (position === 0) position = slides.length;
+  if (position === slides.length + 1) position = 1;
+  draw(); busy = false;
+ }
+ function move(delta) {
+  if (busy) return;
+  busy = true; position += delta; draw(true);
+  if (reduced.matches) finish(); else timer=setTimeout(finish,500);
+ }
+ track.addEventListener('transitionend', e => { if(e.target===track && e.propertyName==='transform') finish(); });
  root.querySelector('[data-carousel-prev]').addEventListener('click', () => move(-1));
  root.querySelector('[data-carousel-next]').addEventListener('click', () => move(1));
- pause.addEventListener('click', () => { paused = !paused; render(); });
- root.addEventListener('mouseenter', () => hovering = true);
- root.addEventListener('mouseleave', () => hovering = false);
- root.addEventListener('focusin', () => focused = true);
- root.addEventListener('focusout', e => focused = root.contains(e.relatedTarget));
- track.addEventListener('keydown', e => {
-  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
-   e.preventDefault(); move(['ArrowUp','ArrowLeft'].includes(e.key) ? -1 : 1);
-  }
+ function updatePause() { pause.textContent=paused?'▶':'Ⅱ';pause.setAttribute('aria-label',paused?'自動送りを再開':'自動送りを停止'); }
+ pause.addEventListener('click', () => { paused=!paused;updatePause(); });
+ root.addEventListener('mouseenter', () => hovering=true);
+ root.addEventListener('mouseleave', () => hovering=false);
+ root.addEventListener('focusin', () => focused=true);
+ root.addEventListener('focusout', e => focused=root.contains(e.relatedTarget));
+ track.addEventListener('keydown', e => { if(['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();move(e.key==='ArrowLeft'?-1:1);} });
+ viewport.addEventListener('pointerdown', e => { if(busy || e.target.closest('button') || e.button!==0)return;gesture={x:e.clientX,y:e.clientY,dx:0,horizontal:false};suppressClick=false; });
+ viewport.addEventListener('pointermove', e => {
+  if(!gesture)return;
+  const dx=e.clientX-gesture.x,dy=e.clientY-gesture.y;
+  if(!gesture.horizontal && Math.abs(dy)>Math.abs(dx) && Math.abs(dy)>10){gesture=null;return;}
+  if(Math.abs(dx)>10){gesture.horizontal=true;gesture.dx=dx;suppressClick=true;viewport.setPointerCapture(e.pointerId);draw(false,dx);}
  });
- let startY = null;
- track.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, {passive:true});
- track.addEventListener('touchend', e => {
-  if (startY !== null && Math.abs(e.changedTouches[0].clientY-startY)>50) move(e.changedTouches[0].clientY<startY ? 1 : -1);
-  startY = null;
- }, {passive:true});
- reduced.addEventListener('change', () => { paused = reduced.matches; render(); });
- setInterval(() => { if (!paused && !hovering && !focused && !document.hidden) move(1); }, 7000);
- render();
+ function endGesture(){if(!gesture)return;const {dx,horizontal}=gesture;gesture=null;if(horizontal && Math.abs(dx)>40)move(dx<0?1:-1);else draw(true);}
+ viewport.addEventListener('pointerup',endGesture);
+ viewport.addEventListener('pointercancel',()=>{gesture=null;draw(true);});
+ viewport.addEventListener('click',e=>{if(suppressClick){e.preventDefault();e.stopPropagation();suppressClick=false;}},true);
+ viewport.addEventListener('dragstart',e=>e.preventDefault());
+ reduced.addEventListener('change',()=>{paused=reduced.matches;finish();updatePause();});
+ setInterval(()=>{if(!paused&&!hovering&&!focused&&!gesture&&!document.hidden)move(1);},7000);
+ draw();updatePause();
 }
