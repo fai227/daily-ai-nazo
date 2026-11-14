@@ -3,7 +3,7 @@ import { puzzleUrl } from '../lib/puzzles';
 const { puzzles } = Astro.props;
 const months = [...new Set(puzzles.map(({data:p}) => p.date.slice(0,7)))].sort().reverse();
 ---
-<p class="calendar-key"><span class="unread-dot"></span> 未クリア</p>
+
 <div class="calendars">{months.map(month => {
  const [year,m] = month.split('-').map(Number);
  const offset = new Date(Date.UTC(year,m-1,1)).getUTCDay();

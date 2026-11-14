@@ -17,7 +17,6 @@ if (dataElement) {
   const key = keyFor(`${puzzle.id}:${puzzle.revision}`);
   const result = document.getElementById('result');
   const solution = document.getElementById('solution');
-  if (readSaved(key)) result.textContent = 'この端末で正解済みです。';
   document.getElementById('answer-form').addEventListener('submit', event => {
     event.preventDefault();
     const answer = normalize(document.getElementById('answer').value);
@@ -31,19 +30,45 @@ if (dataElement) {
   });
 }
 
-const latestHeading = document.getElementById('latest-heading');
-if (latestHeading) {
-  const parts = new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
-  const value = type => parts.find(p => p.type === type).value;
-  const today = `${value('year')}-${value('month')}-${value('day')}`;
-  latestHeading.textContent = latestHeading.dataset.date === today ? '今日の謎' : '最新の謎';
-}
-
-const track=document.querySelector('.carousel-track');
-if(track){
- const prev=document.querySelector('[data-carousel-prev]'),next=document.querySelector('[data-carousel-next]'),count=document.querySelector('[data-carousel-count]');
- const slides=[...track.children]; let index=0;
- const update=()=>{index=Math.max(0,Math.min(slides.length-1,Math.round(track.scrollLeft/track.clientWidth)));count.textContent=`${index+1} / ${slides.length}`;prev.disabled=index===0;next.disabled=index===slides.length-1;};
- const move=delta=>{const target=Math.max(0,Math.min(slides.length-1,index+delta));track.scrollTo({left:target*track.clientWidth,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});};
- prev.addEventListener('click',()=>move(-1));next.addEventListener('click',()=>move(1));track.addEventListener('scroll',update,{passive:true});track.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();move(e.key==='ArrowLeft'?-1:1);}});window.addEventListener('resize',()=>{track.scrollLeft=index*track.clientWidth;update();});update();
+const track = document.querySelector('.carousel-track');
+if (track) {
+ const slides = [...track.children], root = track.closest('.carousel');
+ const count = root.querySelector('[data-carousel-count]');
+ const pause = root.querySelector('[data-carousel-pause]');
+ const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+ let index = 0, paused = reduced.matches, hovering = false, focused = false;
+ track.classList.add('drum');
+ function render() {
+  slides.forEach((slide, i) => {
+   const active = i === index;
+   slide.classList.toggle('active', active);
+   slide.inert = !active;
+   slide.setAttribute('aria-hidden', String(!active));
+  });
+  count.textContent = `${index + 1} / ${slides.length}`;
+  pause.textContent = paused ? '▶' : 'Ⅱ';
+  pause.setAttribute('aria-label', paused ? '自動送りを再開' : '自動送りを停止');
+ }
+ function move(delta) { index = (index + delta + slides.length) % slides.length; render(); }
+ root.querySelector('[data-carousel-prev]').addEventListener('click', () => move(-1));
+ root.querySelector('[data-carousel-next]').addEventListener('click', () => move(1));
+ pause.addEventListener('click', () => { paused = !paused; render(); });
+ root.addEventListener('mouseenter', () => hovering = true);
+ root.addEventListener('mouseleave', () => hovering = false);
+ root.addEventListener('focusin', () => focused = true);
+ root.addEventListener('focusout', e => focused = root.contains(e.relatedTarget));
+ track.addEventListener('keydown', e => {
+  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
+   e.preventDefault(); move(['ArrowUp','ArrowLeft'].includes(e.key) ? -1 : 1);
+  }
+ });
+ let startY = null;
+ track.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, {passive:true});
+ track.addEventListener('touchend', e => {
+  if (startY !== null && Math.abs(e.changedTouches[0].clientY-startY)>50) move(e.changedTouches[0].clientY<startY ? 1 : -1);
+  startY = null;
+ }, {passive:true});
+ reduced.addEventListener('change', () => { paused = reduced.matches; render(); });
+ setInterval(() => { if (!paused && !hovering && !focused && !document.hidden) move(1); }, 7000);
+ render();
 }
