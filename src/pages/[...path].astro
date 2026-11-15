@@ -12,7 +12,7 @@ export async function getStaticPaths() {
 }
 const { kind, p, previous, next, path, puzzles } = Astro.props;
 if (kind === 'archive' && path !== 'archive') return Astro.redirect(href('archive/') + '#year-' + path.slice(0,4));
-const title = kind === 'puzzle' ? `${p.date} の謎` : path==='archive' ? '過去の謎' : path.length===4 ? `${path}年の謎` : `${path.slice(0,4)}年${Number(path.slice(5))}月の謎`;
+const title = kind === 'puzzle' ? `${p.date.slice(0,4)}年${Number(p.date.slice(5,7))}月${Number(p.date.slice(8,10))}日の謎` : path==='archive' ? '過去の謎' : path.length===4 ? `${path}年の謎` : `${path.slice(0,4)}年${Number(path.slice(5))}月の謎`;
 const groups = kind==='archive' ? [...new Set(puzzles.map(p => path==='archive' ? p.data.date.slice(0,4) : path.length===4 ? p.data.date.slice(0,7).replace('-','/') : ''))].filter(Boolean) : [];
 ---
 <Layout title={title}>

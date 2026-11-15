@@ -4,3 +4,5 @@
 .carousel{margin-top:24px;position:relative}.carousel-viewport{position:relative;overflow:hidden;touch-action:pan-y}.carousel.enhanced .carousel-track{overflow:visible;scroll-snap-type:none;will-change:transform}.carousel-slide .issue{justify-content:flex-end}.carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:44px;height:44px;border:1px solid #ddd;border-radius:50%;padding:0;background:rgba(255,255,255,.92);color:#181818;font-size:30px;line-height:1;box-shadow:0 2px 8px #00000012}.carousel-arrow:hover{background:white}.carousel-arrow.prev{left:8px}.carousel-arrow.next{right:8px}#result:empty{display:none}
 
 .carousel-arrow{display:grid;place-items:center}.carousel-arrow svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.archive-link{display:block;text-align:right}.archive-year{scroll-margin-top:24px}.archive-year>summary{font-size:18px}.archive-year .calendars{margin-top:28px}
+
+header{position:sticky;top:0;z-index:20;background:#fff}html{scroll-padding-top:100px}.archive-year{scroll-margin-top:100px}
