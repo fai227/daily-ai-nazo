@@ -34,7 +34,6 @@ const track = document.querySelector('.carousel-track');
 if (track) {
  const slides = [...track.children], root = track.closest('.carousel');
  const viewport = root.querySelector('.carousel-viewport');
- const pause = root.querySelector('[data-carousel-pause]');
  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
  let position = 1, busy = false, timer, paused = reduced.matches, hovering = false, focused = false, gesture = null, suppressClick = false;
  const first = slides[0].cloneNode(true), last = slides.at(-1).cloneNode(true);
@@ -60,8 +59,6 @@ if (track) {
  track.addEventListener('transitionend', e => { if(e.target===track && e.propertyName==='transform') finish(); });
  root.querySelector('[data-carousel-prev]').addEventListener('click', () => move(-1));
  root.querySelector('[data-carousel-next]').addEventListener('click', () => move(1));
- function updatePause() { pause.textContent=paused?'▶':'Ⅱ';pause.setAttribute('aria-label',paused?'自動送りを再開':'自動送りを停止'); }
- pause.addEventListener('click', () => { paused=!paused;updatePause(); });
  root.addEventListener('mouseenter', () => hovering=true);
  root.addEventListener('mouseleave', () => hovering=false);
  root.addEventListener('focusin', () => focused=true);
@@ -79,7 +76,15 @@ if (track) {
  viewport.addEventListener('pointercancel',()=>{gesture=null;draw(true);});
  viewport.addEventListener('click',e=>{if(suppressClick){e.preventDefault();e.stopPropagation();suppressClick=false;}},true);
  viewport.addEventListener('dragstart',e=>e.preventDefault());
- reduced.addEventListener('change',()=>{paused=reduced.matches;finish();updatePause();});
+ reduced.addEventListener('change',()=>{paused=reduced.matches;finish();});
  setInterval(()=>{if(!paused&&!hovering&&!focused&&!gesture&&!document.hidden)move(1);},7000);
- draw();updatePause();
+ draw();
 }
+
+function openArchiveYear() {
+ const id = location.hash.slice(1);
+ const year = document.getElementById(id);
+ if (year?.classList.contains('archive-year')) year.open = true;
+}
+openArchiveYear();
+window.addEventListener('hashchange', openArchiveYear);
